@@ -12,70 +12,10 @@ import {
 const MovieDashboard = () => {
   return (
     <div className="flex h-screen bg-[#F8F9FD] text-slate-800 font-sans">
-      {/* --- Sidebar --- */}
-      <aside className="w-64 bg-white border-r border-slate-100 flex flex-col p-6">
-        <div className="flex items-center gap-2 mb-10">
-          <div className="bg-indigo-600 p-1.5 rounded-lg text-white">
-            <Zap size={20} fill="currentColor" />
-          </div>
-          <div>
-            <h1 className="font-bold text-lg leading-tight">流明语法</h1>
-            <p className="text-xs text-slate-400">版本 2.4.0</p>
-          </div>
-        </div>
-
-        <nav className="flex-1 space-y-2">
-          <button className="flex items-center gap-3 w-full p-3 bg-white shadow-sm border border-slate-50 rounded-xl text-indigo-600 font-medium">
-            <Search size={18} />
-            <span>浏览</span>
-          </button>
-          <button className="flex items-center gap-3 w-full p-3 text-slate-500 hover:bg-slate-50 rounded-xl transition-colors">
-            <Folder size={18} />
-            <span>项目</span>
-          </button>
-        </nav>
-
-        <div className="mt-auto space-y-4">
-          <button className="w-full bg-indigo-600 text-white py-3 rounded-xl font-medium shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all">
-            新建项目
-          </button>
-          <div className="space-y-1">
-            <button className="flex items-center gap-3 w-full p-2 text-slate-400 text-sm hover:text-slate-600">
-              <HelpCircle size={18} /> 支持
-            </button>
-            <button className="flex items-center gap-3 w-full p-2 text-slate-400 text-sm hover:text-slate-600">
-              <Settings size={18} /> 设置
-            </button>
-          </div>
-        </div>
-      </aside>
-
       {/* --- Main Area --- */}
-      <main className="flex-1 overflow-y-auto">
-        {/* Header */}
-        <header className="flex items-center justify-between px-10 py-6">
-          <div className="relative w-96">
-            <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-              size={16}
-            />
-            <input
-              type="text"
-              placeholder="搜索..."
-              className="w-full bg-slate-100 border-none rounded-full py-2 pl-10 pr-4 focus:ring-2 focus:ring-indigo-500 text-sm outline-none"
-            />
-          </div>
-          <div className="flex items-center gap-6 text-slate-500">
-            <Zap size={20} className="cursor-pointer hover:text-indigo-600" />
-            <div className="flex items-center gap-2 cursor-pointer hover:text-indigo-600">
-              <User size={20} />
-              <span className="text-sm font-medium">账户</span>
-            </div>
-          </div>
-        </header>
-
+      <main className="flex-1 overflow-y-auto p-12">
         {/* Content */}
-        <div className="px-10 pb-10">
+        <div className="pb-10">
           {/* Hero Banner */}
           <section className="relative h-[320px] rounded-3xl overflow-hidden mb-12 group">
             <img

@@ -42,62 +42,9 @@ const ProjectsPage = () => {
 
   return (
     <div className="flex h-screen bg-[#F8F9FD] text-slate-800">
-      {/* --- Sidebar (保持一致) --- */}
-      <aside className="w-64 bg-white border-r border-slate-100 flex flex-col p-6 shrink-0">
-        <div className="flex items-center gap-2 mb-10">
-          <div className="bg-indigo-600 p-1.5 rounded-lg text-white">
-            <Zap size={20} fill="currentColor" />
-          </div>
-          <div>
-            <h1 className="font-bold text-lg leading-tight">ai movie</h1>
-            <p className="text-xs text-slate-400">版本 0.0.1</p>
-          </div>
-        </div>
-        <nav className="flex-1 space-y-2 text-slate-500">
-          <button className="flex items-center gap-3 w-full p-3 hover:bg-slate-50 rounded-xl transition-colors">
-            <Search size={18} /> 浏览
-          </button>
-          <button className="flex items-center gap-3 w-full p-3 bg-white shadow-sm border border-slate-50 rounded-xl text-indigo-600 font-medium">
-            <Folder size={18} /> 项目
-          </button>
-        </nav>
-        <div className="mt-auto space-y-4">
-          <button className="w-full bg-indigo-600 text-white py-3 rounded-xl font-medium shadow-lg shadow-indigo-100">
-            新建项目
-          </button>
-          <div className="space-y-1 text-slate-400 text-sm">
-            <button className="flex items-center gap-3 w-full p-2 hover:text-slate-600">
-              <HelpCircle size={18} /> 支持
-            </button>
-            <button className="flex items-center gap-3 w-full p-2 hover:text-slate-600">
-              <Settings size={18} /> 设置
-            </button>
-          </div>
-        </div>
-      </aside>
-
       {/* --- Main Content --- */}
-      <main className="flex-1 overflow-y-auto">
-        {/* Top Header */}
-        <header className="flex items-center justify-end px-10 py-6 gap-6">
-          <div className="relative w-64">
-            <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300"
-              size={16}
-            />
-            <input
-              type="text"
-              placeholder="搜索..."
-              className="w-full bg-slate-100/50 rounded-full py-1.5 pl-10 pr-4 text-sm outline-none focus:ring-1 focus:ring-indigo-500/20"
-            />
-          </div>
-          <Zap size={20} className="text-slate-400 cursor-pointer" />
-          <div className="flex items-center gap-2 text-slate-400 cursor-pointer">
-            <User size={20} /> <span className="text-sm font-medium">账户</span>
-          </div>
-        </header>
-
-        <div className="px-12 max-w-6xl mx-auto">
+      <main className="flex-1 overflow-y-auto p-12">
+        <div className="max-w-6xl mx-auto">
           {/* Page Title Section */}
           <div className="flex justify-between items-start mb-8">
             <div>

@@ -14,7 +14,7 @@ import {
 
 export default function SettingsPage() {
   return (
-    <div className="min-h-screen bg-[#F8F9FD] p-12 text-slate-800 pb-24 relative">
+    <div className="min-h-screen bg-[#F8F9FD] text-slate-800 px-12 py-10 pb-28 relative">
       <div className="max-w-4xl mx-auto">
         {/* --- Header --- */}
         <header className="mb-10">
@@ -126,10 +126,7 @@ export default function SettingsPage() {
               />
             </div>
           </section>
-        </div>
-
-        {/* --- Bottom Actions --- */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-slate-100 p-6">
+          {/* --- 修改后的 Bottom Actions --- */}
           <div className="max-w-4xl mx-auto flex justify-end gap-6 items-center">
             <button className="text-slate-500 font-bold hover:text-slate-800 transition-colors">
               取消

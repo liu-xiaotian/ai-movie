@@ -3,6 +3,8 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  /* 1. 在这里定义 brand 的原始颜色值 */
+  --brand: #4f39f6;
 }
 
 @theme inline {
@@ -10,6 +12,10 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* 2. 在这里映射 Tailwind 类名 */
+  /* 添加这一行后，bg-brand, text-brand, shadow-brand 都会生效 */
+  --color-brand: var(--brand);
 }
 
 @media (prefers-color-scheme: dark) {

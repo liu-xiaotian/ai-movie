@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { User, Mail, Lock, ShieldCheck } from "lucide-react";
+import Link from "next/link";
 
 export default function RegisterPage() {
   const [form, setForm] = useState({
@@ -114,9 +115,9 @@ export default function RegisterPage() {
         <div className="mt-8 text-center">
           <p className="text-gray-500 text-sm">
             已有账号？
-            <a href="/login" className="text-brand font-bold ml-1">
+            <Link href="/auth/login" className="text-brand font-bold ml-1">
               返回登录
-            </a>
+            </Link>
           </p>
         </div>
       </div>

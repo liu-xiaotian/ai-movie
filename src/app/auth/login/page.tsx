@@ -2,8 +2,10 @@
 import React, { useState } from "react";
 import { Mail, Lock, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -29,6 +31,8 @@ export default function LoginPage() {
       setError(data.error || "登录失败");
     } else {
       setSuccess("登录成功");
+      // 这里用 router
+      router.push("/");
     }
   };
 

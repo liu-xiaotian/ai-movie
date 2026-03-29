@@ -32,7 +32,7 @@ export default function LoginPage() {
     } else {
       setSuccess("登录成功");
       // 这里用 router
-      router.push("/");
+      router.push("/dashboard");
     }
   };
 
@@ -100,7 +100,7 @@ export default function LoginPage() {
         <div className="mt-8 text-center">
           <p className="text-gray-500 text-sm">
             还没有账号？
-            <Link href="/auth/register" className="text-brand font-bold ml-1">
+            <Link href="/register" className="text-brand font-bold ml-1">
               立即注册
             </Link>
           </p>

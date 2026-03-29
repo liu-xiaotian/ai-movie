@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
-import MovieDashboardClient from "./dashboard/MovieDashboardClient"; // Client Component
 import { useRouter } from "next/navigation";
+import MovieDashboardClient from "./(main)/dashboard/MovieDashboardClient";
 
 const JWT_SECRET = process.env.JWT_SECRET || "super-secret-key";
 
@@ -14,7 +14,7 @@ export default function DashboardPage() {
       .then((res) => res.json())
       .then((data) => {
         if (!data.user) {
-          router.push("/auth/login");
+          router.push("/login");
         } else {
           setUser(data.user);
         }

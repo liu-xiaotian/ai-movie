@@ -115,7 +115,7 @@ export default function RegisterPage() {
         <div className="mt-8 text-center">
           <p className="text-gray-500 text-sm">
             已有账号？
-            <Link href="/auth/login" className="text-brand font-bold ml-1">
+            <Link href="/login" className="text-brand font-bold ml-1">
               返回登录
             </Link>
           </p>

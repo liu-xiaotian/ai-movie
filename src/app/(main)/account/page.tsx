@@ -1,4 +1,4 @@
-import React from "react";
+"use client";
 import {
   Mail,
   Edit3,
@@ -13,8 +13,14 @@ import {
   Camera,
   ChevronRight,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function AccountPage() {
+  const route = useRouter();
+  const handleLayout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    route.push("/login");
+  };
   return (
     <div className="min-h-screen bg-[#F8F9FD] p-12 text-slate-800">
       <div className="max-w-5xl mx-auto">
@@ -149,7 +155,10 @@ export default function AccountPage() {
             </section>
 
             {/* Logout Button */}
-            <button className="w-full flex items-center justify-center gap-2 py-5 rounded-3xl border border-red-100 bg-white text-red-500 font-bold hover:bg-red-50 transition-all shadow-sm">
+            <button
+              onClick={handleLayout}
+              className="w-full flex items-center justify-center gap-2 py-5 rounded-3xl border border-red-100 bg-white text-red-500 font-bold hover:bg-red-50 transition-all shadow-sm"
+            >
               <LogOut size={20} /> 退出登录
             </button>
           </div>

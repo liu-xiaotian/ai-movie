@@ -179,7 +179,6 @@ New York → 高亮（地点）
 👉 UI：
 
 - hover 显示 info card
-- 可跳转到电影页
 
 ---
 
@@ -307,10 +306,7 @@ SRT
 
 技术路径：
 
-- OpenAI / LLM
-- 或：
-  - spaCy
-  - transformers
+- Qwen / LLM
 
 输出：
 

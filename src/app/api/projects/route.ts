@@ -1,17 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "../../../../auth"; // ⚠️ 注意：v5 建议从你定义 auth 的地方导出 auth
+import { cookies } from "next/headers";
+import { verifyToken } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-export async function GET(req: NextRequest) {
-  const session = await auth();
-  console.log(session);
+async function getUserId(): Promise<number | null> {
+  const token = (await cookies()).get("token")?.value;
+  if (!token) return null;
+  const payload = verifyToken(token);
+  return payload?.userId ?? null;
+}
 
-  if (!session?.user?.id) {
+export async function GET() {
+  const userId = await getUserId();
+  if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const projects = await prisma.project.findMany({
-    where: { userId: Number(session.user.id) },
+    where: { userId },
     include: { files: true },
     orderBy: { createdAt: "desc" },
   });
@@ -20,14 +26,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  console.log("SESSION:", session);
-  ``;
-  if (!session?.user?.id) {
-    return NextResponse.json(
-      { error: "Unauthorized /api/projects/route.ts" },
-      { status: 401 },
-    );
+  const userId = await getUserId();
+  if (!userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const { title, description } = await req.json();
@@ -38,7 +39,7 @@ export async function POST(req: NextRequest) {
 
   const project = await prisma.project.create({
     data: {
-      userId: Number(session.user.id),
+      userId,
       title,
       description,
       status: "DRAFT",

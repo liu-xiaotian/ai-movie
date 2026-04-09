@@ -1,62 +1,60 @@
 import React from "react";
-import {
-  Search,
-  Folder,
-  Zap,
-  HelpCircle,
-  Settings,
-  User,
-  Plus,
-  Filter,
-  MoreVertical,
-  Clock,
-} from "lucide-react";
+import Link from "next/link";
+import { cookies } from "next/headers";
+import { Search, Plus, Filter, MoreVertical, Clock } from "lucide-react";
+import { verifyToken } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
-const ProjectsPage = () => {
-  const projects = [
-    {
-      id: 1,
-      title: "星际穿越",
-      time: "2 小时前",
-      status: "进行中",
-      progress: 65,
-      img: "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=200",
-    },
-    {
-      id: 2,
-      title: "银翼杀手 2049",
-      time: "1 天前",
-      status: "进行中",
-      progress: 92,
-      img: "https://images.unsplash.com/photo-1533928298208-27ff66555d8d?q=80&w=200",
-    },
-    {
-      id: 3,
-      title: "降临",
-      time: "3 天前",
-      status: "已完成",
-      progress: 100,
-      img: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=200",
-    },
-  ];
+const STATUS_LABEL: Record<string, string> = {
+  DRAFT: "草稿",
+  UPLOADING: "上传中",
+  PROCESSING: "进行中",
+  COMPLETED: "已完成",
+  FAILED: "失败",
+};
+
+function formatRelativeTime(date: Date): string {
+  const diff = Date.now() - date.getTime();
+  const minutes = Math.floor(diff / 60000);
+  if (minutes < 60) return `${minutes} 分钟前`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} 小时前`;
+  const days = Math.floor(hours / 24);
+  return `${days} 天前`;
+}
+
+async function getProjects() {
+  const token = (await cookies()).get("token")?.value;
+  if (!token) return [];
+  const payload = verifyToken(token);
+  if (!payload) return [];
+
+  return prisma.project.findMany({
+    where: { userId: payload.userId },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+const ProjectsPage = async () => {
+  const projects = await getProjects();
 
   return (
     <div className="flex h-screen bg-[#F8F9FD] text-slate-800">
-      {/* --- Main Content --- */}
       <main className="flex-1 overflow-y-auto p-12">
         <div className="max-w-6xl mx-auto">
-          {/* Page Title Section */}
           <div className="flex justify-between items-start mb-8">
             <div>
               <h2 className="text-4xl font-bold mb-2 text-slate-900">项目</h2>
               <p className="text-slate-400">管理您的字幕翻译工作流。</p>
             </div>
-            <button className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-medium flex items-center gap-2 shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all">
+            <Link
+              href="/projects/new"
+              className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-medium flex items-center gap-2 shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all"
+            >
               <Plus size={18} strokeWidth={3} /> 新建项目
-            </button>
+            </Link>
           </div>
 
-          {/* Search & Filter Bar */}
           <div className="flex gap-4 mb-8">
             <div className="relative flex-1">
               <Search
@@ -74,34 +72,57 @@ const ProjectsPage = () => {
             </button>
           </div>
 
-          {/* Project List */}
-          <div className="space-y-4">
-            {projects.map((project) => (
-              <ProjectItem key={project.id} {...project} />
-            ))}
-          </div>
+          {projects.length === 0 ? (
+            <div className="text-center py-24 text-slate-400">
+              <p className="text-lg font-medium mb-2">暂无项目</p>
+              <p className="text-sm">
+                点击右上角「新建项目」开始您的第一个翻译任务
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {projects.map((project) => (
+                <ProjectItem
+                  key={project.id}
+                  id={project.id}
+                  title={project.title}
+                  time={formatRelativeTime(project.createdAt)}
+                  status={STATUS_LABEL[project.status] ?? project.status}
+                  progress={project.progress}
+                  isDone={project.status === "COMPLETED"}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </main>
     </div>
   );
 };
 
-// --- Sub-component: Project ListItem ---
-const ProjectItem = ({ title, time, status, progress, img }: any) => {
-  const isDone = status === "已完成";
-
-  return (
+const ProjectItem = ({
+  id,
+  title,
+  time,
+  status,
+  progress,
+  isDone,
+}: {
+  id: number;
+  title: string;
+  time: string;
+  status: string;
+  progress: number;
+  isDone: boolean;
+}) => (
+  <Link href={`/projects/${id}`}>
     <div className="bg-white border border-slate-100 p-5 rounded-3xl flex items-center gap-6 hover:shadow-md hover:shadow-slate-200/50 transition-all cursor-pointer group">
-      {/* Thumbnail */}
-      <div className="w-32 h-20 rounded-xl overflow-hidden shrink-0">
-        <img
-          src={img}
-          alt={title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-        />
+      <div className="w-32 h-20 rounded-xl overflow-hidden shrink-0 bg-slate-100 flex items-center justify-center">
+        <span className="text-slate-300 text-3xl font-bold">
+          {title.charAt(0)}
+        </span>
       </div>
 
-      {/* Content Area */}
       <div className="flex-1 flex flex-col justify-between h-20 py-1">
         <div className="flex justify-between items-start">
           <div className="flex flex-col gap-1">
@@ -121,12 +142,11 @@ const ProjectItem = ({ title, time, status, progress, img }: any) => {
               </span>
             </div>
           </div>
-          <button className="text-slate-300 hover:text-slate-600 transition-colors">
+          <span className="text-slate-300 hover:text-slate-600 transition-colors">
             <MoreVertical size={20} />
-          </button>
+          </span>
         </div>
 
-        {/* Progress Bar Container */}
         <div className="flex items-center gap-4">
           <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
             <div
@@ -140,7 +160,7 @@ const ProjectItem = ({ title, time, status, progress, img }: any) => {
         </div>
       </div>
     </div>
-  );
-};
+  </Link>
+);
 
 export default ProjectsPage;

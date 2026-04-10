@@ -363,31 +363,3 @@ users
 ```
 
 ## 电影
-
-```
-movies
-- id
-- title
-- year
-- poster
-```
-
-## 字幕
-
-```
-subtitles
-- id
-- movie_id
-- language
-- content (json)
-```
-
-## 评论
-
-```
-comments
-- id
-- user_id
-- target_id
-- type (movie/subtitle)
-```

@@ -109,7 +109,8 @@ export default async function ProjectDetailPage({
               </span>
             </div>
             <p className="text-slate-400 text-sm mt-1 flex items-center gap-1">
-              <Clock size={14} /> 最后修改于 {formatRelativeTime(project.updatedAt)}
+              <Clock size={14} /> 最后修改于{" "}
+              {formatRelativeTime(project.updatedAt)}
             </p>
           </div>
         </div>
@@ -296,43 +297,6 @@ export default async function ProjectDetailPage({
               <ExportButton label="导出为 .VTT" />
             </div>
           </div>
-
-          {/* Status hint */}
-          {project.status !== "COMPLETED" && (
-            <div className="bg-indigo-50/60 rounded-[32px] p-6 border border-indigo-100/60">
-              <div className="flex items-start gap-3">
-                {project.status === "FAILED" ? (
-                  <AlertCircle
-                    size={18}
-                    className="text-red-500 mt-0.5 shrink-0"
-                  />
-                ) : (
-                  <Sparkles
-                    size={18}
-                    className="text-indigo-600 mt-0.5 shrink-0"
-                  />
-                )}
-                <div>
-                  <p className="font-bold text-sm text-indigo-900 mb-1">
-                    {project.status === "FAILED"
-                      ? "项目出现错误"
-                      : "项目进行中"}
-                  </p>
-                  <p className="text-xs text-indigo-700/60 leading-relaxed">
-                    {project.status === "FAILED"
-                      ? "请检查上传的文件或重新创建项目。"
-                      : "点击「继续编辑」进入字幕翻译编辑器，开始翻译工作。"}
-                  </p>
-                </div>
-              </div>
-              <Link
-                href={`/projects/${project.id}/edit`}
-                className="mt-4 w-full block text-center bg-indigo-600 text-white py-3 rounded-2xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-md shadow-indigo-200"
-              >
-                继续编辑
-              </Link>
-            </div>
-          )}
         </div>
       </div>
     </div>

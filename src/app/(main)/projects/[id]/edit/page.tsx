@@ -80,14 +80,11 @@ export default function SubtitleEditor() {
     async (entryId: number, translation: string) => {
       setSavingId(entryId);
       try {
-        await fetch(
-          `/api/projects/${projectId}/subtitles/${entryId}`,
-          {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ translation }),
-          },
-        );
+        await fetch(`/api/projects/${projectId}/subtitles/${entryId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ translation }),
+        });
         setSavedId(entryId);
         setTimeout(() => setSavedId(null), 2000);
       } finally {
@@ -131,8 +128,7 @@ export default function SubtitleEditor() {
             if (data === "[DONE]") continue;
             try {
               const parsed = JSON.parse(data);
-              const delta =
-                parsed.choices?.[0]?.delta?.content ?? "";
+              const delta = parsed.choices?.[0]?.delta?.content ?? "";
               accumulated += delta;
               patchLocal(entryId, accumulated);
             } catch {
@@ -313,10 +309,7 @@ export default function SubtitleEditor() {
                         className="text-indigo-400 animate-spin"
                       />
                     ) : entry.translation ? (
-                      <CheckCircle2
-                        size={12}
-                        className="text-emerald-400"
-                      />
+                      <CheckCircle2 size={12} className="text-emerald-400" />
                     ) : (
                       <div className="w-2.5 h-2.5 rounded-full bg-slate-200" />
                     )}
@@ -374,9 +367,7 @@ export default function SubtitleEditor() {
                     <div className="flex items-center gap-2 text-indigo-600">
                       <Sparkles
                         size={15}
-                        fill={
-                          selected.translation ? "currentColor" : "none"
-                        }
+                        fill={selected.translation ? "currentColor" : "none"}
                       />
                       <span className="text-xs font-bold uppercase tracking-wider">
                         AI 翻译（中文）
@@ -406,9 +397,7 @@ export default function SubtitleEditor() {
                   <div className="relative group">
                     <textarea
                       value={selected.translation ?? ""}
-                      onChange={(e) =>
-                        handleTranslationChange(e.target.value)
-                      }
+                      onChange={(e) => handleTranslationChange(e.target.value)}
                       placeholder={
                         translatingId === selected.id
                           ? "正在翻译…"

@@ -3,6 +3,7 @@
 import React from "react";
 import { Search, Zap, User } from "lucide-react";
 import Link from "next/link";
+import clsx from "clsx";
 
 export default function TopNav() {
   return (
@@ -22,9 +23,11 @@ export default function TopNav() {
           <input
             type="text"
             placeholder="搜索项目、文件或设置..."
-            className="w-full bg-white border border-slate-200 rounded-2xl py-2.5 pl-12 pr-4 
-                       text-sm outline-none shadow-sm transition-all
-                       focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500"
+            className={clsx(
+              "w-full bg-white border border-slate-200 rounded-2xl py-2.5 pl-12 pr-4",
+              "text-sm outline-none shadow-sm transition-all",
+              "focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500",
+            )}
           />
         </div>
 

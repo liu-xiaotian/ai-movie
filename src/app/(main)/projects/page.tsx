@@ -80,7 +80,7 @@ const ProjectsPage = async () => {
               </p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="flex flex-col space-y-4">
               {projects.map((project) => (
                 <ProjectItem
                   key={project.id}

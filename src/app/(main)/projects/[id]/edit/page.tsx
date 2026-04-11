@@ -68,6 +68,14 @@ export default function SubtitleEditor() {
     load();
   }, [projectId]);
 
+  useEffect(() => {
+    if (entries.length === 0) return; // 没有数据就不执行
+    const runBatchTranslate = async () => {
+      await handleBatchTranslate();
+    };
+    runBatchTranslate();
+  }, [entries]); // 空数组 => 只在页面挂载时执行一次
+
   // ── Update entry translation in local state ─────────────────────────────────
   const patchLocal = useCallback((entryId: number, text: string) => {
     setEntries((prev) =>

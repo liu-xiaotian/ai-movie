@@ -150,11 +150,11 @@ export default function SubtitleEditor() {
     [projectId, patchLocal, saveTranslation],
   );
 
-  // ── Translate current selected entry ────────────────────────────────────────
-  const handleTranslateCurrent = () => {
-    if (!selectedId || translatingId !== null) return;
-    translateEntry(selectedId);
-  };
+  // ── 翻译词句（已弃用）Translate current selected entry ────────────────────────────────────────
+  // const handleTranslateCurrent = () => {
+  //   if (!selectedId || translatingId !== null) return;
+  //   translateEntry(selectedId);
+  // };
 
   // ── Batch translate all untranslated entries ─────────────────────────────────
   const handleBatchTranslate = async () => {
@@ -356,7 +356,7 @@ export default function SubtitleEditor() {
                       原文
                     </span>
                   </div>
-                  <p className="text-2xl font-medium text-slate-500 leading-snug">
+                  <p className="text-0.5 font-medium text-slate-500 leading-snug">
                     {selected.original}
                   </p>
                 </section>
@@ -364,16 +364,16 @@ export default function SubtitleEditor() {
                 {/* Translation */}
                 <section className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2 text-indigo-600">
+                    <div className="flex items-center gap-2 text-indigo-400">
                       <Sparkles
                         size={15}
                         fill={selected.translation ? "currentColor" : "none"}
                       />
                       <span className="text-xs font-bold uppercase tracking-wider">
-                        AI 翻译（中文）
+                        译文 (点击可修改)
                       </span>
                     </div>
-                    <button
+                    {/* <button
                       onClick={handleTranslateCurrent}
                       disabled={
                         translatingId !== null || batchProgress !== null
@@ -391,24 +391,59 @@ export default function SubtitleEditor() {
                           {selected.translation ? "重新翻译" : "翻译此句"}
                         </>
                       )}
-                    </button>
+                    </button> */}
                   </div>
 
-                  <div className="relative group">
+                  <div className="relative group w-full">
                     <textarea
                       value={selected.translation ?? ""}
                       onChange={(e) => handleTranslationChange(e.target.value)}
                       placeholder={
                         translatingId === selected.id
                           ? "正在翻译…"
-                          : "点击「翻译此句」让 AI 翻译，或直接输入译文"
+                          : "点击输入译文..."
                       }
-                      className="w-full min-h-[180px] bg-white border-2 border-slate-900 rounded-2xl p-6 text-2xl leading-relaxed outline-none resize-none font-medium text-slate-800 placeholder:text-slate-200 placeholder:text-base transition-all focus:border-indigo-400"
+                      className="
+                        /* 基础布局与尺寸 */
+                        w-full min-h-[160px] p-4 
+                        resize-none outline-none transition-all duration-150 rounded-xl
+                        
+                        /* 文字排版 */
+                        text-2xl font-medium leading-relaxed
+                        /* 重点1: 默认状态使用较沉稳的颜色 */
+                        text-slate-800 
+                        placeholder:text-slate-300 placeholder:text-lg
+                        
+                        /* 背景控制 */
+                        border-none bg-transparent 
+                        /* 重点2: Hover 时增加一个柔和的背景，作为点击引导 */
+                        hover:bg-indigo-50/50 
+                        
+                        /* ============ 重点3: 点击时的强调色 (Focus State) ============ */
+                        /* 1. 使用 ring（聚焦环）而不是 border，看起来更轻盈 */
+                        focus:ring-2 
+                        /* 2. 这里的 ring-indigo-300 是强调色，你可以替换成你品牌的强调色 */
+                        focus:ring-indigo-300 
+                        /* 3. 聚焦时让背景稍微亮一点或全白，拉开层次 */
+                        focus:bg-white 
+                        /* 4. (可选) 聚焦时让文字颜色略微变深，增加输入专注度 */
+                        focus:text-black
+                        /* ======================================================= */
+                      "
                     />
-                    {translatingId === selected.id && (
-                      <div className="absolute bottom-4 right-4 flex items-center gap-1.5 text-xs text-slate-400">
-                        <Loader2 size={11} className="animate-spin" />
-                        生成中…
+
+                    {/* 状态指示器 */}
+                    {translatingId === selected.id ? (
+                      <div className="absolute bottom-2 right-2 flex items-center gap-2 px-3 py-1 bg-white/80 backdrop-blur-sm rounded-full shadow-sm text-xs text-indigo-500 animate-pulse">
+                        <Loader2 size={12} className="animate-spin" />
+                        <span>AI 正在思考</span>
+                      </div>
+                    ) : (
+                      /* 仅在 hover 且内容为空时，在右下角微弱提示可编辑 */
+                      <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 focus-within:opacity-0 transition-opacity pointer-events-none">
+                        <span className="text-xs text-indigo-300 font-light italic">
+                          点击可修改
+                        </span>
                       </div>
                     )}
                   </div>
@@ -498,26 +533,6 @@ export default function SubtitleEditor() {
                     size={14}
                     className={`transition-transform duration-300 ${isExportOpen ? "rotate-180" : ""}`}
                   />
-                </button>
-
-                <div className="w-px h-6 bg-slate-100 mx-1" />
-
-                {/* AI translate current */}
-                <button
-                  onClick={handleTranslateCurrent}
-                  disabled={
-                    !selected ||
-                    translatingId !== null ||
-                    batchProgress !== null
-                  }
-                  className="p-3 text-indigo-600 hover:bg-indigo-50 rounded-2xl disabled:opacity-40 transition-all"
-                  title="翻译此句"
-                >
-                  {translatingId !== null ? (
-                    <Loader2 size={20} className="animate-spin" />
-                  ) : (
-                    <Sparkles size={20} />
-                  )}
                 </button>
               </div>
             </div>

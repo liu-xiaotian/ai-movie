@@ -39,7 +39,7 @@ export default function MainLayout({
       <Sidebar />
       <main className="flex-1 flex flex-col h-screen overflow-y-hidden">
         <TopNav />
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        {children}
       </main>
     </div>
   );

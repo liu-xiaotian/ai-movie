@@ -29,11 +29,5 @@ export default function AuthLayout({
     };
     checkUser();
   }, [router]);
-  return (
-    <html lang="zh">
-      <body className="flex items-center justify-center min-h-screen bg-bgLight">
-        <div className="w-full">{children}</div>
-      </body>
-    </html>
-  );
+  return <div className="w-full">{children}</div>;
 }

@@ -16,10 +16,19 @@ import {
 import { useRouter } from "next/navigation";
 
 export default function AccountPage() {
-  const route = useRouter();
-  const handleLayout = async () => {
-    await fetch("/api/auth/logout", { method: "POST" });
-    route.push("/login");
+  const router = useRouter();
+  const handleLogout = async () => {
+    const response = await fetch("/api/auth/logout", {
+      method: "POST",
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to log out");
+    }
+
+    router.replace("/login");
+    router.refresh();
   };
   return (
     <div className="min-h-screen bg-[#F8F9FD] p-12 text-slate-800">
@@ -156,7 +165,11 @@ export default function AccountPage() {
 
             {/* Logout Button */}
             <button
-              onClick={handleLayout}
+              onClick={() => {
+                handleLogout().catch((error) => {
+                  console.error("退出登录失败", error);
+                });
+              }}
               className="w-full flex items-center justify-center gap-2 py-5 rounded-3xl border border-red-100 bg-white text-red-500 font-bold hover:bg-red-50 transition-all shadow-sm"
             >
               <LogOut size={20} /> 退出登录

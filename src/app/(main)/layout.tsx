@@ -2,10 +2,9 @@
 // app/(main)/layout.tsx
 import Sidebar from "@/components/Sidebar";
 import TopNav from "@/components/TopNav";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-const JWT_SECRET = process.env.JWT_SECRET || "super-secret-key";
 export default function MainLayout({
   children,
 }: {
@@ -17,17 +16,17 @@ export default function MainLayout({
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await fetch("/api/auth/me");
+        const res = await fetch("/api/auth/me", { cache: "no-store" });
         const data = await res.json();
 
-        if (!data.user) {
-          router.push("/login");
+        if (!res.ok || !data.user) {
+          router.replace("/login");
         } else {
           setUser(data.user);
         }
       } catch (err) {
         console.error("获取用户信息失败：", err);
-        router.push("/login");
+        router.replace("/login");
       }
     };
     fetchUser();

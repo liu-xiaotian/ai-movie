@@ -3,18 +3,19 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import MovieDashboardClient from "./(main)/dashboard/MovieDashboardClient";
 
-const JWT_SECRET = process.env.JWT_SECRET || "super-secret-key";
-
 export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
   const router = useRouter();
 
   useEffect(() => {
-    fetch("/api/auth/me")
-      .then((res) => res.json())
-      .then((data) => {
-        if (!data.user) {
-          router.push("/login");
+    fetch("/api/auth/me", { cache: "no-store" })
+      .then(async (res) => ({
+        ok: res.ok,
+        data: await res.json(),
+      }))
+      .then(({ ok, data }) => {
+        if (!ok || !data.user) {
+          router.replace("/login");
         } else {
           setUser(data.user);
         }

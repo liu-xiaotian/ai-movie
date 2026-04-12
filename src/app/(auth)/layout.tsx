@@ -14,10 +14,10 @@ export default function AuthLayout({
   useEffect(() => {
     const checkUser = async () => {
       try {
-        const res = await fetch("/api/auth/me");
+        const res = await fetch("/api/auth/me", { cache: "no-store" });
         const data = await res.json();
 
-        if (data.user) {
+        if (res.ok && data.user) {
           router.replace("/dashboard");
         } else {
           setLoading(false);
@@ -29,5 +29,10 @@ export default function AuthLayout({
     };
     checkUser();
   }, [router]);
+
+  if (loading) {
+    return null;
+  }
+
   return <div className="w-full">{children}</div>;
 }

@@ -9,7 +9,7 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   const menuItems = [
-    { name: "电影推荐", icon: <Search size={18} />, href: "/" },
+    { name: "电影推荐", icon: <Search size={18} />, href: "/dashboard" },
     { name: "项目", icon: <Folder size={18} />, href: "/projects" },
   ];
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { startTransition, useState } from "react";
 import clsx from "clsx";
 import { useRouter } from "next/navigation";
 import {
@@ -72,6 +72,7 @@ export default function NewProjectWizard({
   mode = "page",
 }: NewProjectWizardProps) {
   const router = useRouter();
+  const isCompact = mode === "modal";
 
   const [activeStep, setActiveStep] = useState(1);
   const [projectId, setProjectId] = useState<number | null>(null);
@@ -211,7 +212,10 @@ export default function NewProjectWizard({
         throw new Error(data?.error || "保存项目配置失败");
       }
 
-      router.push("/projects");
+      startTransition(() => {
+        router.replace("/projects");
+        router.refresh();
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : "保存项目配置失败");
     } finally {
@@ -222,12 +226,19 @@ export default function NewProjectWizard({
   return (
     <div className="flex h-full flex-col">
       {error ? (
-        <div className="mb-5 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">
+        <div className="mb-5 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600 shadow-sm shadow-red-100/60">
           {error}
         </div>
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
+      <div
+        className={clsx(
+          "grid gap-5",
+          isCompact
+            ? "lg:grid-cols-[210px_minmax(0,1fr)]"
+            : "lg:grid-cols-[250px_minmax(0,1fr)]",
+        )}
+      >
         <ol className="space-y-3">
           {steps.map((step) => {
             const Icon = step.icon;
@@ -238,33 +249,41 @@ export default function NewProjectWizard({
               <li
                 key={step.id}
                 className={clsx(
-                  "rounded-[24px] border px-4 py-4 transition-all",
+                  "rounded-[22px] border transition-all duration-300",
+                  isCompact ? "px-3.5 py-3.5" : "px-4 py-4",
                   isActive
-                    ? "border-slate-200 bg-white shadow-sm"
+                    ? "border-indigo-200 bg-gradient-to-br from-indigo-50 via-white to-white shadow-lg shadow-indigo-100/50"
                     : isDone
-                      ? "border-emerald-100 bg-emerald-50/70"
-                      : "border-transparent bg-slate-50/80",
+                      ? "border-indigo-100 bg-white shadow-sm shadow-indigo-100/30"
+                      : "border-transparent bg-white/65",
                 )}
               >
                 <div className="flex items-start gap-3">
                   <div
                     className={clsx(
-                      "flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl",
+                      "flex shrink-0 items-center justify-center rounded-2xl transition-all",
+                      isCompact ? "h-9 w-9" : "h-10 w-10",
                       isActive
-                        ? "bg-slate-900 text-white"
+                        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200"
                         : isDone
-                          ? "bg-emerald-500 text-white"
-                          : "bg-white text-slate-400",
+                          ? "bg-indigo-500 text-white shadow-sm shadow-indigo-100"
+                          : "border border-indigo-100 bg-indigo-50 text-indigo-300",
                     )}
                   >
-                    {isDone ? <Check size={18} strokeWidth={2.4} /> : <Icon size={18} />}
+                    {isDone ? (
+                      <Check size={18} strokeWidth={2.4} />
+                    ) : (
+                      <Icon size={18} />
+                    )}
                   </div>
 
                   <div className="min-w-0">
                     <p
                       className={clsx(
                         "text-[11px] font-semibold uppercase tracking-[0.22em]",
-                        isActive || isDone ? "text-slate-500" : "text-slate-400",
+                        isActive || isDone
+                          ? "text-indigo-500"
+                          : "text-slate-400",
                       )}
                     >
                       Step {step.id}
@@ -272,7 +291,12 @@ export default function NewProjectWizard({
                     <p className="mt-1 text-base font-semibold text-slate-900">
                       {step.title}
                     </p>
-                    <p className="mt-1 text-sm leading-6 text-slate-500">
+                    <p
+                      className={clsx(
+                        "mt-1 text-slate-500",
+                        isCompact ? "text-[13px] leading-5" : "text-sm leading-6",
+                      )}
+                    >
                       {step.description}
                     </p>
                   </div>
@@ -284,12 +308,26 @@ export default function NewProjectWizard({
 
         <div
           className={clsx(
-            "flex min-h-[460px] flex-col rounded-[28px] border border-slate-100 bg-slate-50/70 p-6 sm:p-8",
-            mode === "modal" ? "lg:min-h-[520px]" : "lg:min-h-[560px]",
+            "relative flex min-h-[400px] flex-col overflow-hidden rounded-[28px] border border-indigo-100/80 bg-[linear-gradient(180deg,rgba(238,242,255,0.92),rgba(255,255,255,0.98))] shadow-[0_24px_80px_-42px_rgba(79,70,229,0.38)]",
+            isCompact ? "p-5 sm:p-6 lg:min-h-[440px]" : "p-6 sm:p-8 lg:min-h-[560px]",
           )}
         >
+          <div
+            className={clsx(
+              "pointer-events-none absolute right-0 top-0 translate-x-8 -translate-y-8 rounded-full bg-indigo-200/50 blur-3xl",
+              isCompact ? "h-28 w-28" : "h-36 w-36",
+            )}
+          />
+          <div
+            className={clsx(
+              "pointer-events-none absolute bottom-0 left-0 -translate-x-8 translate-y-8 rounded-full bg-violet-200/35 blur-3xl",
+              isCompact ? "h-24 w-24" : "h-32 w-32",
+            )}
+          />
+          <div className="relative flex h-full flex-col">
           {activeStep === 1 ? (
             <StepOne
+              compact={isCompact}
               loading={loading}
               projectName={formData.projectName}
               onProjectNameChange={(projectName) =>
@@ -304,6 +342,7 @@ export default function NewProjectWizard({
 
           {activeStep === 2 ? (
             <StepTwo
+              compact={isCompact}
               uploading={uploading}
               selectedFile={selectedFile}
               onBack={handleBack}
@@ -314,6 +353,7 @@ export default function NewProjectWizard({
 
           {activeStep === 3 ? (
             <StepThree
+              compact={isCompact}
               aiEnhanced={formData.aiEnhanced}
               finishing={finishing}
               projectName={formData.projectName}
@@ -335,6 +375,7 @@ export default function NewProjectWizard({
               }
             />
           ) : null}
+          </div>
         </div>
       </div>
     </div>
@@ -342,6 +383,7 @@ export default function NewProjectWizard({
 }
 
 type StepOneProps = {
+  compact: boolean;
   loading: boolean;
   projectName: string;
   onProjectNameChange: (value: string) => void;
@@ -349,6 +391,7 @@ type StepOneProps = {
 };
 
 function StepOne({
+  compact,
   loading,
   projectName,
   onProjectNameChange,
@@ -357,21 +400,36 @@ function StepOne({
   return (
     <section className="flex h-full flex-col">
       <div>
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">
+        <p
+          className={clsx(
+            "font-semibold uppercase tracking-[0.2em] text-indigo-500",
+            compact ? "text-[12px]" : "text-sm",
+          )}
+        >
           Step 1
         </p>
-        <h2 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+        <h2
+          className={clsx(
+            "mt-2 font-semibold tracking-tight text-slate-900",
+            compact ? "text-[28px]" : "text-3xl",
+          )}
+        >
           先给项目起个名字
         </h2>
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-500">
+        <p
+          className={clsx(
+            "mt-3 max-w-2xl text-sm text-slate-500",
+            compact ? "leading-6" : "leading-7",
+          )}
+        >
           这个名称会出现在项目列表里，用来区分不同字幕翻译任务。
         </p>
       </div>
 
-      <div className="mt-10">
+      <div className={clsx(compact ? "mt-7" : "mt-10")}>
         <label
           htmlFor="project-name"
-          className="mb-3 block text-sm font-medium text-slate-500"
+          className="mb-3 block text-sm font-medium text-indigo-600"
         >
           项目名称
         </label>
@@ -381,16 +439,22 @@ function StepOne({
           value={projectName}
           onChange={(e) => onProjectNameChange(e.target.value)}
           placeholder="例如：星际穿越 字幕翻译"
-          className="w-full rounded-[22px] border border-slate-200 bg-white px-5 py-4 text-lg text-slate-900 outline-none transition focus:border-slate-900"
+          className={clsx(
+            "w-full rounded-[22px] border border-indigo-100 bg-white text-slate-900 outline-none transition placeholder:text-slate-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10",
+            compact ? "px-4 py-3.5 text-base" : "px-5 py-4 text-lg",
+          )}
         />
       </div>
 
-      <div className="mt-auto flex justify-end pt-8">
+      <div className={clsx("mt-auto flex justify-end", compact ? "pt-6" : "pt-8")}>
         <button
           type="button"
           disabled={!projectName.trim() || loading}
           onClick={onSubmit}
-          className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+          className={clsx(
+            "inline-flex items-center gap-2 rounded-2xl bg-indigo-600 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-indigo-300 disabled:shadow-none",
+            compact ? "px-4 py-3" : "px-5 py-3.5",
+          )}
         >
           {loading ? (
             <>
@@ -410,6 +474,7 @@ function StepOne({
 }
 
 type StepTwoProps = {
+  compact: boolean;
   uploading: boolean;
   selectedFile: File | null;
   onBack: () => void;
@@ -418,6 +483,7 @@ type StepTwoProps = {
 };
 
 function StepTwo({
+  compact,
   uploading,
   selectedFile,
   onBack,
@@ -427,20 +493,45 @@ function StepTwo({
   return (
     <section className="flex h-full flex-col">
       <div>
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">
+        <p
+          className={clsx(
+            "font-semibold uppercase tracking-[0.2em] text-indigo-500",
+            compact ? "text-[12px]" : "text-sm",
+          )}
+        >
           Step 2
         </p>
-        <h2 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+        <h2
+          className={clsx(
+            "mt-2 font-semibold tracking-tight text-slate-900",
+            compact ? "text-[28px]" : "text-3xl",
+          )}
+        >
           上传字幕源文件
         </h2>
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-500">
+        <p
+          className={clsx(
+            "mt-3 max-w-2xl text-sm text-slate-500",
+            compact ? "leading-6" : "leading-7",
+          )}
+        >
           支持 `.srt`、`.vtt`、`.ass` 三种格式，上传后会进入下一步配置。
         </p>
       </div>
 
-      <div className="mt-10 flex-1 rounded-[28px] border border-dashed border-slate-200 bg-white p-6 sm:p-8">
+      <div
+        className={clsx(
+          "mt-10 flex-1 rounded-[28px] border border-dashed border-indigo-200 bg-white/90",
+          compact ? "p-5 sm:p-6" : "p-6 sm:p-8",
+        )}
+      >
         <div className="flex items-center gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-500">
+          <div
+            className={clsx(
+              "flex items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600",
+              compact ? "h-12 w-12" : "h-14 w-14",
+            )}
+          >
             <Upload size={22} />
           </div>
           <div>
@@ -451,10 +542,10 @@ function StepTwo({
           </div>
         </div>
 
-        <div className="mt-8 rounded-[22px] border border-slate-200 bg-slate-50/80 p-4">
+        <div className={clsx("rounded-[22px] border border-indigo-100 bg-indigo-50/45 p-4", compact ? "mt-6" : "mt-8")}>
           <label
             htmlFor="subtitle-file"
-            className="mb-3 block text-sm font-medium text-slate-500"
+            className="mb-3 block text-sm font-medium text-indigo-600"
           >
             字幕文件
           </label>
@@ -463,14 +554,14 @@ function StepTwo({
             type="file"
             accept=".srt,.vtt,.ass"
             onChange={(e) => onFileChange(e.target.files?.[0] || null)}
-            className="block w-full text-sm text-slate-500 file:mr-4 file:rounded-xl file:border-0 file:bg-slate-900 file:px-4 file:py-2.5 file:font-medium file:text-white hover:file:bg-slate-800"
+            className="block w-full text-sm text-slate-500 file:mr-4 file:rounded-xl file:border-0 file:bg-indigo-600 file:px-4 file:py-2.5 file:font-medium file:text-white hover:file:bg-indigo-700"
           />
         </div>
 
         {selectedFile ? (
-          <div className="mt-5 rounded-[22px] border border-emerald-100 bg-emerald-50 px-4 py-4">
+          <div className="mt-5 rounded-[22px] border border-indigo-100 bg-indigo-50/80 px-4 py-4">
             <div className="flex items-start gap-3">
-              <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500 text-white">
+              <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm shadow-indigo-200">
                 <Check size={16} strokeWidth={2.5} />
               </div>
               <div>
@@ -484,12 +575,15 @@ function StepTwo({
         ) : null}
       </div>
 
-      <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-end">
+      <div className={clsx("flex flex-col gap-3 sm:flex-row sm:justify-end", compact ? "mt-6" : "mt-8")}>
         <button
           type="button"
           onClick={onBack}
           disabled={uploading}
-          className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+          className={clsx(
+            "inline-flex items-center justify-center gap-2 rounded-2xl border border-indigo-100 bg-white text-sm font-semibold text-indigo-600 transition hover:bg-indigo-50 disabled:cursor-not-allowed disabled:opacity-60",
+            compact ? "px-4 py-3" : "px-5 py-3.5",
+          )}
         >
           <ArrowLeft size={16} />
           上一步
@@ -499,7 +593,10 @@ function StepTwo({
           type="button"
           onClick={onSubmit}
           disabled={!selectedFile || uploading}
-          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+          className={clsx(
+            "inline-flex items-center justify-center gap-2 rounded-2xl bg-indigo-600 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-indigo-300 disabled:shadow-none",
+            compact ? "px-4 py-3" : "px-5 py-3.5",
+          )}
         >
           {uploading ? (
             <>
@@ -519,6 +616,7 @@ function StepTwo({
 }
 
 type StepThreeProps = {
+  compact: boolean;
   aiEnhanced: boolean;
   finishing: boolean;
   projectName: string;
@@ -531,6 +629,7 @@ type StepThreeProps = {
 };
 
 function StepThree({
+  compact,
   aiEnhanced,
   finishing,
   projectName,
@@ -544,18 +643,33 @@ function StepThree({
   return (
     <section className="flex h-full flex-col">
       <div>
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">
+        <p
+          className={clsx(
+            "font-semibold uppercase tracking-[0.2em] text-indigo-500",
+            compact ? "text-[12px]" : "text-sm",
+          )}
+        >
           Step 3
         </p>
-        <h2 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+        <h2
+          className={clsx(
+            "mt-2 font-semibold tracking-tight text-slate-900",
+            compact ? "text-[28px]" : "text-3xl",
+          )}
+        >
           完成 AI 翻译配置
         </h2>
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-500">
+        <p
+          className={clsx(
+            "mt-3 max-w-2xl text-sm text-slate-500",
+            compact ? "leading-6" : "leading-7",
+          )}
+        >
           选择目标语言，并决定是否开启 AI 增强翻译，确认后项目就会进入处理流程。
         </p>
       </div>
 
-      <div className="mt-8 grid gap-3 sm:grid-cols-2">
+      <div className={clsx("grid gap-3 sm:grid-cols-2", compact ? "mt-6" : "mt-8")}>
         <SummaryCard label="项目名称" value={projectName || "未命名项目"} />
         <SummaryCard
           label="字幕文件"
@@ -563,8 +677,8 @@ function StepThree({
         />
       </div>
 
-      <div className="mt-8">
-        <div className="mb-3 flex items-center gap-2 text-slate-500">
+      <div className={clsx(compact ? "mt-6" : "mt-8")}>
+        <div className="mb-3 flex items-center gap-2 text-indigo-600">
           <Languages size={16} />
           <span className="text-sm font-medium">目标语言</span>
         </div>
@@ -578,8 +692,8 @@ function StepThree({
               className={clsx(
                 "rounded-2xl border px-4 py-3 text-left text-sm font-medium transition",
                 targetLanguage === language
-                  ? "border-slate-900 bg-slate-900 text-white"
-                  : "border-slate-200 bg-white text-slate-600 hover:border-slate-300",
+                  ? "border-indigo-600 bg-indigo-600 text-white shadow-md shadow-indigo-200"
+                  : "border-indigo-100 bg-white text-slate-600 hover:border-indigo-200 hover:bg-indigo-50",
               )}
             >
               {language}
@@ -593,17 +707,18 @@ function StepThree({
         onClick={onToggleAi}
         aria-pressed={aiEnhanced}
         className={clsx(
-          "mt-8 flex items-center justify-between gap-4 rounded-[24px] border px-5 py-5 text-left transition",
+          "flex items-center justify-between gap-4 rounded-[24px] border px-5 text-left transition",
+          compact ? "mt-6 py-4" : "mt-8 py-5",
           aiEnhanced
-            ? "border-amber-200 bg-amber-50"
-            : "border-slate-200 bg-white",
+            ? "border-indigo-200 bg-gradient-to-r from-indigo-50 to-white shadow-sm shadow-indigo-100/40"
+            : "border-indigo-100 bg-white",
         )}
       >
         <div>
           <div className="flex items-center gap-2">
             <Sparkles
               size={18}
-              className={aiEnhanced ? "text-amber-600" : "text-slate-400"}
+              className={aiEnhanced ? "text-indigo-600" : "text-slate-400"}
             />
             <span className="text-base font-semibold text-slate-900">
               AI 增强翻译
@@ -617,7 +732,7 @@ function StepThree({
         <span
           className={clsx(
             "relative inline-flex h-7 w-12 shrink-0 rounded-full transition",
-            aiEnhanced ? "bg-slate-900" : "bg-slate-300",
+            aiEnhanced ? "bg-indigo-600" : "bg-slate-300",
           )}
         >
           <span
@@ -629,12 +744,15 @@ function StepThree({
         </span>
       </button>
 
-      <div className="mt-auto flex flex-col gap-3 pt-8 sm:flex-row sm:justify-end">
+      <div className={clsx("mt-auto flex flex-col gap-3 sm:flex-row sm:justify-end", compact ? "pt-6" : "pt-8")}>
         <button
           type="button"
           onClick={onBack}
           disabled={finishing}
-          className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+          className={clsx(
+            "inline-flex items-center justify-center gap-2 rounded-2xl border border-indigo-100 bg-white text-sm font-semibold text-indigo-600 transition hover:bg-indigo-50 disabled:cursor-not-allowed disabled:opacity-60",
+            compact ? "px-4 py-3" : "px-5 py-3.5",
+          )}
         >
           <ArrowLeft size={16} />
           上一步
@@ -644,7 +762,10 @@ function StepThree({
           type="button"
           onClick={onFinish}
           disabled={finishing}
-          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+          className={clsx(
+            "inline-flex items-center justify-center gap-2 rounded-2xl bg-indigo-600 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-indigo-300 disabled:shadow-none",
+            compact ? "px-4 py-3" : "px-5 py-3.5",
+          )}
         >
           {finishing ? (
             <>
@@ -670,8 +791,8 @@ type SummaryCardProps = {
 
 function SummaryCard({ label, value }: SummaryCardProps) {
   return (
-    <div className="rounded-[22px] border border-slate-200 bg-white px-4 py-4">
-      <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-400">
+    <div className="rounded-[22px] border border-indigo-100 bg-white/85 px-4 py-4 shadow-sm shadow-indigo-100/20">
+      <p className="text-xs font-medium uppercase tracking-[0.18em] text-indigo-400">
         {label}
       </p>
       <p className="mt-2 text-sm font-semibold text-slate-900">{value}</p>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { HelpCircle } from "lucide-react";
+import { HelpCircle, Star } from "lucide-react";
 import { Movie } from "@/types/movie";
 
 export default function MovieDashboardClient() {
@@ -14,7 +14,7 @@ export default function MovieDashboardClient() {
   }, []);
 
   return (
-    <div className="flex h-screen bg-[#F8F9FD] text-slate-800 font-sans">
+    <div className="flex bg-[#F8F9FD] text-slate-800 font-sans">
       <main className="flex-1 overflow-y-auto p-12">
         <div className="pb-10">
           {/* Hero Banner */}
@@ -41,7 +41,7 @@ export default function MovieDashboardClient() {
               <h3 className="text-2xl font-bold text-slate-800">推荐项目</h3>
             </div>
 
-            <div className="grid grid-cols-3 gap-8">
+            <div className="grid grid-cols-2 gap-8">
               {movies.map((movie) => (
                 <MovieCard key={movie.id} movie={movie} />
               ))}
@@ -57,32 +57,38 @@ export default function MovieDashboardClient() {
 interface MovieCardProps {
   movie: Movie;
 }
-const MovieCard = ({ movie }: MovieCardProps) => (
-  <div className="group cursor-pointer">
-    <div className="aspect-[2/3] rounded-[24px] overflow-hidden mb-4 shadow-sm border border-slate-100">
+const MovieCard = ({ movie }: MovieCardProps) => {
+  const score = Number(movie.rating || 0);
+  const starCount = Math.round(score / 2);
+  return (
+    <div className="flex gap-4 p-4 bg-white">
       <img
-        src={movie.image}
-        alt={movie.title}
-        referrerPolicy="no-referrer"
-        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+        src={movie.big_image}
+        className="w-[100px] h-[140px]  rounded-lg object-cover shrink-0"
       />
+      <div className="flex-1 flex flex-col gap-2 min-w-0">
+        <h2 className="text-lg font-semibold truncate">
+          {movie.title + " " + movie.year}
+        </h2>
+
+        <div className="flex items-center gap-1">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Star
+              key={i}
+              className={`w-4 h-4 ${
+                i < starCount
+                  ? "text-yellow-400 fill-yellow-400"
+                  : "text-gray-300"
+              }`}
+            />
+          ))}
+          <span className="text-orange-500">{movie.rating}</span>
+        </div>
+
+        <div className="text-sm text-gray-600 line-clamp-2">
+          {movie.description}
+        </div>
+      </div>
     </div>
-    <div className="flex justify-between items-start mb-1">
-      <h4 className="font-bold text-lg text-slate-800">{movie.title}</h4>
-      <span className="text-xs text-slate-400 mt-1.5">{movie.year}</span>
-    </div>
-    <p className="text-slate-500 text-sm line-clamp-2 mb-4 leading-relaxed">
-      {movie.description}
-    </p>
-    <div className="flex gap-2">
-      {movie.genre.map((tag: string) => (
-        <span
-          key={tag}
-          className="px-3 py-1 bg-slate-100 text-slate-500 text-xs rounded-full"
-        >
-          {tag}
-        </span>
-      ))}
-    </div>
-  </div>
-);
+  );
+};

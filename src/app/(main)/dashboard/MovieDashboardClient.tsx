@@ -192,37 +192,50 @@ interface MovieCardProps {
 function MovieCard({ movie }: MovieCardProps) {
   const score = Number(movie.rating || 0);
   const starCount = Math.round(score / 2);
+  const projectName = `${movie.title} 字幕翻译`;
 
   return (
-    <div className="flex gap-4 bg-white p-4">
-      <img
-        src={movie.big_image}
-        alt={movie.title}
-        className="h-[140px] w-[100px] shrink-0 rounded-lg object-cover"
-      />
-      <div className="min-w-0 flex-1 flex flex-col gap-2">
-        <h2 className="truncate text-lg font-semibold">
-          {movie.title + " " + movie.year}
-        </h2>
+    <Link
+      href={{
+        pathname: "/projects/new",
+        query: {
+          autoStart: "1",
+          projectName,
+        },
+      }}
+      aria-label={`为 ${movie.title} 创建字幕项目`}
+      className="block rounded-2xl transition-transform duration-200 hover:-translate-y-1"
+    >
+      <article className="flex gap-4 rounded-2xl bg-white p-4 shadow-sm transition-shadow hover:shadow-lg hover:shadow-slate-200/70">
+        <img
+          src={movie.big_image}
+          alt={movie.title}
+          className="h-[140px] w-[100px] shrink-0 rounded-lg object-cover"
+        />
+        <div className="min-w-0 flex-1 flex flex-col gap-2">
+          <h2 className="truncate text-lg font-semibold">
+            {movie.title + " " + movie.year}
+          </h2>
 
-        <div className="flex items-center gap-1">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Star
-              key={i}
-              className={`h-4 w-4 ${
-                i < starCount
-                  ? "fill-yellow-400 text-yellow-400"
-                  : "text-gray-300"
-              }`}
-            />
-          ))}
-          <span className="text-orange-500">{movie.rating}</span>
-        </div>
+          <div className="flex items-center gap-1">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Star
+                key={i}
+                className={`h-4 w-4 ${
+                  i < starCount
+                    ? "fill-yellow-400 text-yellow-400"
+                    : "text-gray-300"
+                }`}
+              />
+            ))}
+            <span className="text-orange-500">{movie.rating}</span>
+          </div>
 
-        <div className="line-clamp-2 text-sm text-gray-600">
-          {movie.description}
+          <div className="line-clamp-2 text-sm text-gray-600">
+            {movie.description}
+          </div>
         </div>
-      </div>
-    </div>
+      </article>
+    </Link>
   );
 }

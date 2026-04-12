@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useState } from "react";
+import { startTransition, useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 import { useRouter } from "next/navigation";
 import {
@@ -26,6 +26,8 @@ type CreateProjectResponse = {
 type WizardMode = "page" | "modal";
 
 type NewProjectWizardProps = {
+  autoCreateProject?: boolean;
+  initialProjectName?: string;
   mode?: WizardMode;
 };
 
@@ -69,10 +71,13 @@ function getErrorMessage(data: unknown): string | undefined {
 }
 
 export default function NewProjectWizard({
+  autoCreateProject = false,
+  initialProjectName = "",
   mode = "page",
 }: NewProjectWizardProps) {
   const router = useRouter();
   const isCompact = mode === "modal";
+  const autoCreateTriggeredRef = useRef(false);
 
   const [activeStep, setActiveStep] = useState(1);
   const [projectId, setProjectId] = useState<number | null>(null);
@@ -84,7 +89,7 @@ export default function NewProjectWizard({
   const [error, setError] = useState("");
 
   const [formData, setFormData] = useState({
-    projectName: "",
+    projectName: initialProjectName.trim(),
     targetLanguage: "中文（简体）",
     aiEnhanced: true,
   });
@@ -94,8 +99,16 @@ export default function NewProjectWizard({
     setActiveStep((prev) => Math.max(prev - 1, 1));
   };
 
-  const handleCreateProjectBase = async () => {
-    if (!formData.projectName.trim()) {
+  const createProjectBase = async (projectName: string) => {
+    const trimmedProjectName = projectName.trim();
+
+    if (!trimmedProjectName) {
+      return;
+    }
+
+    if (projectId) {
+      setError("");
+      setActiveStep(2);
       return;
     }
 
@@ -109,7 +122,7 @@ export default function NewProjectWizard({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          title: formData.projectName.trim(),
+          title: trimmedProjectName,
           description: "",
         }),
       });
@@ -132,6 +145,24 @@ export default function NewProjectWizard({
       setLoading(false);
     }
   };
+
+  const handleCreateProjectBase = async () => {
+    await createProjectBase(formData.projectName);
+  };
+
+  useEffect(() => {
+    if (!autoCreateProject || projectId || autoCreateTriggeredRef.current) {
+      return;
+    }
+
+    const trimmedProjectName = initialProjectName.trim();
+    if (!trimmedProjectName) {
+      return;
+    }
+
+    autoCreateTriggeredRef.current = true;
+    void createProjectBase(trimmedProjectName);
+  }, [autoCreateProject, initialProjectName, projectId]);
 
   const handleUploadSubtitle = async () => {
     if (!projectId) {

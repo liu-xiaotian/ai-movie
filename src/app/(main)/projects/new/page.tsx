@@ -1,8 +1,20 @@
 import Link from "next/link";
 import { X } from "lucide-react";
 import NewProjectWizard from "@/components/projects/NewProjectWizard";
+import {
+  getNewProjectPrefill,
+  type NewProjectSearchParams,
+} from "@/lib/new-project-prefill";
 
-export default function NewProjectPage() {
+export default async function NewProjectPage({
+  searchParams,
+}: {
+  searchParams: Promise<NewProjectSearchParams>;
+}) {
+  const { autoCreateProject, initialProjectName } = getNewProjectPrefill(
+    await searchParams,
+  );
+
   return (
     <div className="min-h-full bg-[#F8F9FD] px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
       <div className="mx-auto max-w-5xl">
@@ -31,7 +43,11 @@ export default function NewProjectPage() {
           </div>
 
           <div className="px-6 py-6 sm:px-8 sm:py-8">
-            <NewProjectWizard mode="page" />
+            <NewProjectWizard
+              autoCreateProject={autoCreateProject}
+              initialProjectName={initialProjectName}
+              mode="page"
+            />
           </div>
         </div>
       </div>

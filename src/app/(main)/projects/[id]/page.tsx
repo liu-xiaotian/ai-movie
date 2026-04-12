@@ -87,7 +87,7 @@ export default async function ProjectDetailPage({
   const stepLabel = ["", "填写基本信息", "上传字幕源", "AI 配置"];
 
   return (
-    <div className="min-h-screen bg-[#F8F9FD] p-8 text-slate-800">
+    <div className=" bg-[#F8F9FD] p-8 text-slate-800">
       {/* Header */}
       <header className="flex justify-between items-center mb-8">
         <div className="flex items-center gap-4">
@@ -153,7 +153,7 @@ export default async function ProjectDetailPage({
           </div>
 
           {/* Progress Bar */}
-          <section className="bg-[#EDF2F7]/50 border border-white/50 rounded-[40px] p-10">
+          {/* <section className="bg-[#EDF2F7]/50 border border-white/50 rounded-[40px] p-10">
             <div className="flex items-center gap-3 mb-6">
               <Loader2 className="text-indigo-600" size={22} />
               <h3 className="text-xl font-bold">创建进度</h3>
@@ -208,7 +208,7 @@ export default async function ProjectDetailPage({
                 />
               </div>
             </div>
-          </section>
+          </section> */}
 
           {/* Uploaded Files */}
           <section>

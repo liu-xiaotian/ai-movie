@@ -7,8 +7,10 @@ import { useEffect, useState } from "react";
 
 export default function MainLayout({
   children,
+  modal,
 }: {
   children: React.ReactNode;
+  modal: React.ReactNode;
 }) {
   const [user, setUser] = useState<any>(null);
   const router = useRouter();
@@ -40,6 +42,7 @@ export default function MainLayout({
         <TopNav />
         <main className="flex-1 overflow-y-auto">{children}</main>
       </main>
+      {modal}
     </div>
   );
 }

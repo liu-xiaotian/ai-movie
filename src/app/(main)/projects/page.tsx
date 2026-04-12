@@ -39,7 +39,7 @@ const ProjectsPage = async () => {
   const projects = await getProjects();
 
   return (
-    <div className="flex h-screen bg-[#F8F9FD] text-slate-800">
+    <div className="flex bg-[#F8F9FD] text-slate-800">
       <main className="flex-1 overflow-y-auto p-12">
         <div className="max-w-6xl mx-auto">
           <div className="flex justify-between items-start mb-8">

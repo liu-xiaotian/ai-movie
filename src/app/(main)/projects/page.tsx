@@ -1,9 +1,10 @@
 import React from "react";
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { Search, Plus, Filter, MoreVertical, Clock } from "lucide-react";
+import { Search, Plus, Filter } from "lucide-react";
 import { verifyToken } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import ProjectItem from "./ProjectItem";
 
 const STATUS_LABEL: Record<string, string> = {
   DRAFT: "草稿",
@@ -99,68 +100,5 @@ const ProjectsPage = async () => {
     </div>
   );
 };
-
-const ProjectItem = ({
-  id,
-  title,
-  time,
-  status,
-  progress,
-  isDone,
-}: {
-  id: number;
-  title: string;
-  time: string;
-  status: string;
-  progress: number;
-  isDone: boolean;
-}) => (
-  <Link href={`/projects/${id}`}>
-    <div className="bg-white border border-slate-100 p-5 rounded-3xl flex items-center gap-6 hover:shadow-md hover:shadow-slate-200/50 transition-all cursor-pointer group">
-      <div className="w-32 h-20 rounded-xl overflow-hidden shrink-0 bg-slate-100 flex items-center justify-center">
-        <span className="text-slate-300 text-3xl font-bold">
-          {title.charAt(0)}
-        </span>
-      </div>
-
-      <div className="flex-1 flex flex-col justify-between h-20 py-1">
-        <div className="flex justify-between items-start">
-          <div className="flex flex-col gap-1">
-            <h4 className="font-bold text-lg text-slate-800">{title}</h4>
-            <div className="flex items-center gap-4 text-xs font-medium">
-              <span className="flex items-center gap-1 text-slate-400">
-                <Clock size={14} /> {time}
-              </span>
-              <span
-                className={`px-2.5 py-0.5 rounded-full ${
-                  isDone
-                    ? "bg-indigo-100 text-indigo-600"
-                    : "bg-slate-100 text-slate-400"
-                }`}
-              >
-                {status}
-              </span>
-            </div>
-          </div>
-          <span className="text-slate-300 hover:text-slate-600 transition-colors">
-            <MoreVertical size={20} />
-          </span>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-indigo-600 transition-all duration-1000 ease-out"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-          <span className="text-xs font-bold text-slate-400 min-w-[30px]">
-            {progress}%
-          </span>
-        </div>
-      </div>
-    </div>
-  </Link>
-);
 
 export default ProjectsPage;

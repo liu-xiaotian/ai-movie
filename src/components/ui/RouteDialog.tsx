@@ -60,7 +60,7 @@ export default function RouteDialog({
         >
           <div className="pointer-events-none absolute -right-14 -top-14 h-32 w-32 rounded-full bg-indigo-200/55 blur-3xl" />
           <div className="pointer-events-none absolute -left-16 bottom-10 h-36 w-36 rounded-full bg-violet-200/40 blur-3xl" />
-          <div className="h-1 w-full bg-gradient-to-r from-indigo-600 via-violet-500 to-indigo-400" />
+          {/* <div className="h-1 w-full bg-gradient-to-r from-indigo-600 via-violet-500 to-indigo-400" /> */}
 
           <div className="flex items-start justify-between gap-4 border-b border-indigo-100/80 bg-[linear-gradient(90deg,rgba(238,242,255,0.92),rgba(255,255,255,0.98))] px-5 py-4 sm:px-6 sm:py-5">
             <div>

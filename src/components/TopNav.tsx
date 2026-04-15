@@ -33,10 +33,6 @@ export default function TopNav() {
 
         {/* --- 右侧用户选项 --- */}
         <div className="w-40 flex items-center justify-end gap-6 text-slate-500 flex-shrink-0">
-          <button className="p-2 hover:bg-white rounded-xl transition-colors relative">
-            <Zap size={20} className="hover:text-indigo-600" />
-            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-[#F8F9FD]"></span>
-          </button>
           <Link href="/account">
             <div className="flex items-center gap-2 cursor-pointer group px-2 py-1 hover:bg-white rounded-xl transition-all">
               <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600">

@@ -61,7 +61,7 @@ async function getAccountPageData(): Promise<AccountPageData | null> {
   const [
     user,
     totalProjects,
-    completedProjects,
+    inProgressProjects,
     recentProjectsCount,
     subtitleEntriesCount,
     recentProjects,
@@ -81,7 +81,7 @@ async function getAccountPageData(): Promise<AccountPageData | null> {
     prisma.project.count({
       where: {
         userId: payload.userId,
-        status: "COMPLETED",
+        status: "IN_PROGRESS",
       },
     }),
     prisma.project.count({
@@ -124,7 +124,7 @@ async function getAccountPageData(): Promise<AccountPageData | null> {
     },
     stats: {
       totalProjects,
-      completedProjects,
+      inProgressProjects,
       recentProjectsCount,
       subtitleEntriesCount,
       activeDays: getActiveDays(user.createdAt),

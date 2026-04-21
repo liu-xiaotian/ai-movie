@@ -13,6 +13,7 @@ import {
   Loader2,
   Check,
   Languages,
+  AlertCircle,
 } from "lucide-react";
 import { entriesToSRT, entriesToVTT } from "@/lib/subtitle-parser";
 
@@ -32,12 +33,18 @@ export default function SubtitleEditor() {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [translatingId, setTranslatingId] = useState<number | null>(null);
+  const [batchProgress, setBatchProgress] = useState<{
+    current: number;
+    total: number;
+  } | null>(null);
   const [savingId, setSavingId] = useState<number | null>(null);
   const [savedId, setSavedId] = useState<number | null>(null);
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hasAutoTranslated = useRef(false); // 关键：防止重复触发自动翻译
 
   // ── 核心逻辑：自动调整 TextArea 高度 ──
   const autoResize = (target: HTMLTextAreaElement) => {
@@ -46,55 +53,133 @@ export default function SubtitleEditor() {
     target.style.height = target.scrollHeight + "px";
   };
 
+  // 只要 entries 变动，确保高度正确（特别是翻译流式进入时）
   useEffect(() => {
-    if (!loading && entries.length > 0) {
-      const timer = setTimeout(() => {
-        const textareas = document.querySelectorAll("textarea");
-        textareas.forEach((ta) => autoResize(ta as HTMLTextAreaElement));
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [loading, entries.length]);
+    const textareas = document.querySelectorAll("textarea");
+    textareas.forEach((ta) => autoResize(ta as HTMLTextAreaElement));
+  }, [entries]);
 
-  // ── 数据加载 ──
-  const loadEntries = useCallback(async () => {
-    try {
-      setLoading(true);
-      const res = await fetch(`/api/projects/${projectId}/subtitles`);
-      if (!res.ok) throw new Error("Load failed");
-      const data = await res.json();
-      setEntries(data);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  }, [projectId]);
-
-  useEffect(() => {
-    loadEntries();
-  }, [loadEntries]);
-
-  // ── 保存逻辑 ──
-  const handleTranslationChange = (id: number, value: string) => {
+  // ── 更新本地状态 ──
+  const patchLocal = useCallback((entryId: number, text: string) => {
     setEntries((prev) =>
-      prev.map((e) => (e.id === id ? { ...e, translation: value } : e)),
+      prev.map((e) => (e.id === entryId ? { ...e, translation: text } : e)),
     );
+  }, []);
 
-    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
-    saveTimerRef.current = setTimeout(async () => {
-      setSavingId(id);
+  // ── 保存到数据库 ──
+  const saveTranslation = useCallback(
+    async (entryId: number, translation: string) => {
+      setSavingId(entryId);
       try {
-        await fetch(`/api/projects/${projectId}/subtitles/${id}`, {
+        await fetch(`/api/projects/${projectId}/subtitles/${entryId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ translation: value }),
+          body: JSON.stringify({ translation }),
         });
-        setSavedId(id);
+        setSavedId(entryId);
         setTimeout(() => setSavedId(null), 2000);
       } finally {
         setSavingId(null);
       }
+    },
+    [projectId],
+  );
+
+  // ── 单条翻译 (流式) ──
+  const translateEntry = useCallback(
+    async (entryId: number): Promise<string> => {
+      setTranslatingId(entryId);
+      let accumulated = "";
+
+      try {
+        const res = await fetch(`/api/projects/${projectId}/translate`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ entryId }),
+        });
+
+        if (!res.ok) throw new Error("翻译失败");
+
+        const reader = res.body!.getReader();
+        const decoder = new TextDecoder();
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value, { stream: true });
+          for (const line of chunk.split("\n")) {
+            if (!line.startsWith("data: ")) continue;
+            const data = line.slice(6).trim();
+            if (data === "[DONE]") continue;
+            try {
+              const parsed = JSON.parse(data);
+              const delta = parsed.choices?.[0]?.delta?.content ?? "";
+              accumulated += delta;
+              patchLocal(entryId, accumulated);
+            } catch (e) {
+              /* ignore */
+            }
+          }
+        }
+        if (accumulated) await saveTranslation(entryId, accumulated);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setTranslatingId(null);
+      }
+      return accumulated;
+    },
+    [projectId, patchLocal, saveTranslation],
+  );
+
+  // ── 批量翻译逻辑 ──
+  const handleBatchTranslate = useCallback(
+    async (targetEntries: Entry[]) => {
+      const untranslated = targetEntries.filter((e) => !e.translation);
+      if (untranslated.length === 0) return;
+
+      setBatchProgress({ current: 0, total: untranslated.length });
+
+      for (let i = 0; i < untranslated.length; i++) {
+        setBatchProgress({ current: i + 1, total: untranslated.length });
+        await translateEntry(untranslated[i].id);
+      }
+      setBatchProgress(null);
+    },
+    [translateEntry],
+  );
+
+  // ── 数据加载 ──
+  useEffect(() => {
+    const loadEntries = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(`/api/projects/${projectId}/subtitles`);
+        if (!res.ok) throw new Error("加载失败");
+        const data: Entry[] = await res.json();
+        setEntries(data);
+
+        // 只有在第一次加载成功且有未翻译内容时触发
+        if (!hasAutoTranslated.current && data.some((e) => !e.translation)) {
+          hasAutoTranslated.current = true;
+          handleBatchTranslate(data);
+        }
+      } catch (e) {
+        setError("获取字幕数据失败");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadEntries();
+  }, [projectId, handleBatchTranslate]);
+
+  // ── 手动编辑 ──
+  const handleManualEdit = (id: number, value: string) => {
+    patchLocal(id, value);
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => {
+      saveTranslation(id, value);
     }, 1000);
   };
 
@@ -113,7 +198,7 @@ export default function SubtitleEditor() {
 
   return (
     <div className="flex flex-col min-h-screen bg-white text-slate-900">
-      {/* 1. 固定顶部导航 */}
+      {/* 顶部导航 */}
       <header className="sticky top-0 h-14 border-b border-slate-100 flex items-center px-8 shrink-0 bg-white/80 backdrop-blur-md z-40">
         <Link
           href={`/projects/${projectId}`}
@@ -123,32 +208,39 @@ export default function SubtitleEditor() {
         </Link>
         <h1 className="text-sm font-bold tracking-tight">双语对照编辑器</h1>
 
+        {/* 批量翻译进度指示器 */}
+        {batchProgress && (
+          <div className="ml-8 flex items-center gap-3 px-3 py-1 bg-indigo-50 rounded-full border border-indigo-100">
+            <Loader2 size={14} className="animate-spin text-indigo-600" />
+            <span className="text-[11px] font-bold text-indigo-600 uppercase">
+              AI 自动翻译中 {batchProgress.current} / {batchProgress.total}
+            </span>
+          </div>
+        )}
+
         <div className="ml-auto flex items-center gap-6">
-          {/* 修正：导出菜单容器 */}
           <div className="relative">
             <button
               onClick={() => setIsExportOpen(!isExportOpen)}
-              className="text-[11px] font-bold text-slate-500 hover:text-indigo-600 uppercase tracking-wider flex items-center gap-2 py-2"
+              className="text-[11px] font-bold text-slate-500 hover:text-indigo-600 uppercase tracking-wider flex items-center gap-2"
             >
               导出字幕{" "}
               <ChevronUp
                 size={14}
-                className={`transition-transform duration-200 ${isExportOpen ? "" : "rotate-180"}`}
+                className={isExportOpen ? "" : "rotate-180"}
               />
             </button>
-
-            {/* 修正：使用 absolute 定位在按钮下方 */}
             {isExportOpen && (
               <div className="absolute top-full right-0 mt-2 w-44 bg-white border border-slate-200 shadow-2xl rounded-xl p-1 z-50">
                 <button
                   onClick={() => handleExport("srt")}
-                  className="w-full text-left px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 rounded-lg transition-colors"
+                  className="w-full text-left px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 rounded-lg"
                 >
                   导出 SRT
                 </button>
                 <button
                   onClick={() => handleExport("vtt")}
-                  className="w-full text-left px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 rounded-lg mt-1 transition-colors"
+                  className="w-full text-left px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 rounded-lg mt-1"
                 >
                   导出 VTT
                 </button>
@@ -158,21 +250,25 @@ export default function SubtitleEditor() {
         </div>
       </header>
 
-      {/* 2. 固定左右表头 */}
-      <div className="sticky top-14 grid grid-cols-2 border-b border-slate-100 bg-slate-50/90 backdrop-blur-sm z-30 shrink-0">
-        <div className="px-12 py-3 border-r border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">
-          原文 (Source)
+      {/* 表头 */}
+      <div className="sticky top-14 grid grid-cols-2 border-b border-slate-100 bg-slate-50/90 backdrop-blur-sm z-30">
+        <div className="px-12 py-3 border-r border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+          原文
         </div>
-        <div className="px-12 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">
-          译文 (Translation)
+        <div className="px-12 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+          译文
         </div>
       </div>
 
-      {/* 3. 内容主体 */}
       <main className="flex-1 overflow-y-auto">
         {loading ? (
           <div className="flex items-center justify-center h-64">
             <Loader2 className="animate-spin text-slate-200" size={24} />
+          </div>
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center h-64 text-red-400 gap-2">
+            <AlertCircle size={24} />
+            <span className="text-sm">{error}</span>
           </div>
         ) : (
           <div className="divide-y divide-slate-100">
@@ -182,66 +278,52 @@ export default function SubtitleEditor() {
                 onClick={() => setSelectedId(entry.id)}
                 className={`grid grid-cols-2 transition-colors ${selectedId === entry.id ? "bg-indigo-50/10" : ""}`}
               >
-                {/* 左侧：原文展示区 */}
+                {/* 左侧原文 */}
                 <section className="px-12 py-10 border-r border-slate-100 space-y-4">
-                  <div className="flex items-center gap-2 text-indigo-400 font-mono text-[10px] ">
-                    <Clock size={12} />
-                    {entry.startTime.split(",")[0]}
+                  <div className="flex items-center gap-2 text-indigo-400 font-mono text-[10px]">
+                    <Clock size={12} /> {entry.startTime.split(",")[0]}
                   </div>
                   <div className="flex items-start gap-3">
                     <Languages
                       size={18}
                       className="mt-1 text-slate-300 shrink-0"
                     />
-                    <p className="text-xl font-medium text-slate-500 leading-relaxed break-words">
+                    <p className="text-xl font-medium text-slate-500 leading-relaxed">
                       {entry.original}
                     </p>
                   </div>
                 </section>
 
-                {/* 右侧：编辑区 */}
-                <section className="px-12 py-10 space-y-3">
-                  <div className="flex justify-end items-center h-4">
-                    <div className="flex items-center gap-2">
-                      {savingId === entry.id && (
-                        <Loader2
-                          size={12}
-                          className="animate-spin text-indigo-400"
-                        />
-                      )}
-                      {savedId === entry.id && (
-                        <Check size={12} className="text-emerald-500" />
-                      )}
-                    </div>
+                {/* 右侧编辑 */}
+                <section className="px-12 py-10 space-y-3 relative">
+                  <div className="flex justify-end items-center h-4 absolute top-4 right-12">
+                    {savingId === entry.id && (
+                      <Loader2
+                        size={12}
+                        className="animate-spin text-indigo-400"
+                      />
+                    )}
+                    {savedId === entry.id && (
+                      <Check size={12} className="text-emerald-500" />
+                    )}
                   </div>
 
                   <div className="relative group w-full">
                     <textarea
                       value={entry.translation ?? ""}
                       onChange={(e) =>
-                        handleTranslationChange(entry.id, e.target.value)
-                      }
-                      onInput={(e) =>
-                        autoResize(e.target as HTMLTextAreaElement)
+                        handleManualEdit(entry.id, e.target.value)
                       }
                       placeholder={
                         translatingId === entry.id
-                          ? "正在翻译…"
+                          ? "正在翻译..."
                           : "点击输入译文..."
                       }
-                      className="w-full p-4 overflow-hidden resize-none outline-none transition-all duration-150 rounded-xl text-2xl font-medium leading-relaxed text-indigo-400 placeholder:text-slate-300 placeholder:text-lg border-none bg-transparent hover:bg-indigo-50/50 focus:ring-2 focus:ring-indigo-300 focus:bg-white focus:text-black"
+                      className="w-full p-4 overflow-hidden resize-none outline-none rounded-xl text-2xl font-medium leading-relaxed text-indigo-600 placeholder:text-slate-200 border-none bg-transparent hover:bg-indigo-50/30 focus:bg-white focus:ring-2 focus:ring-indigo-100 transition-all"
                     />
-
-                    {translatingId === entry.id ? (
-                      <div className="absolute bottom-2 right-2 flex items-center gap-2 px-3 py-1 bg-white/80 backdrop-blur-sm rounded-full text-xs text-indigo-500 animate-pulse">
-                        <Loader2 size={12} className="animate-spin" />
-                        <span>AI 翻译中</span>
-                      </div>
-                    ) : (
-                      <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 focus-within:opacity-0 transition-opacity pointer-events-none">
-                        <span className="text-xs text-indigo-300 font-light italic">
-                          点击可修改
-                        </span>
+                    {translatingId === entry.id && (
+                      <div className="absolute bottom-2 right-2 flex items-center gap-2 px-3 py-1 bg-white shadow-sm rounded-full text-[10px] text-indigo-500 animate-pulse border border-indigo-100">
+                        <Sparkles size={10} /> AI 正在构思
                       </div>
                     )}
                   </div>
@@ -252,17 +334,8 @@ export default function SubtitleEditor() {
         )}
       </main>
 
-      {/* 全局 CSS */}
       <style jsx global>{`
-        .no-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        .no-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
         textarea {
-          overflow: hidden !important;
           min-height: 80px;
           display: block;
         }

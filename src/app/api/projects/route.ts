@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
       userId,
       title,
       description,
-      status: "DRAFT",
+      status: "NOT_UPLOADED",
       progress: 0,
       currentStep: 1,
     },

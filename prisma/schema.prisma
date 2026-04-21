@@ -28,7 +28,7 @@ model Project {
   title         String
   description   String?
   coverImageUrl String?
-  status        ProjectStatus @default(DRAFT)
+  status        ProjectStatus @default(NOT_UPLOADED)
   progress      Int           @default(0)
   currentStep   Int           @default(1)
   createdAt     DateTime      @default(now())
@@ -79,11 +79,8 @@ model ProjectFile {
 }
 
 enum ProjectStatus {
-  DRAFT
-  UPLOADING
-  PROCESSING
-  COMPLETED
-  FAILED
+  NOT_UPLOADED
+  IN_PROGRESS
 }
 
 enum FileType {

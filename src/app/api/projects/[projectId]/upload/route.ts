@@ -94,7 +94,7 @@ export async function POST(req: NextRequest, context: RouteContext) {
       // Update project status
       prisma.project.update({
         where: { id },
-        data: { status: "UPLOADING", progress: 50, currentStep: 2 },
+        data: { status: "IN_PROGRESS", progress: 50, currentStep: 2 },
       }),
     ]);
 

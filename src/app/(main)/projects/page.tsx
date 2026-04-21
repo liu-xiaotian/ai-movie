@@ -90,7 +90,7 @@ const ProjectsPage = async () => {
                   time={formatRelativeTime(project.createdAt)}
                   status={STATUS_LABEL[project.status] ?? project.status}
                   progress={project.progress}
-                  isDone={project.status === "COMPLETED"}
+                  isDone={project.status === "IN_PROGRESS"}
                 />
               ))}
             </div>

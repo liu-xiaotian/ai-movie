@@ -28,7 +28,7 @@ export type AccountPageData = {
   };
   stats: {
     totalProjects: number;
-    completedProjects: number;
+    inProgressProjects: number;
     recentProjectsCount: number;
     subtitleEntriesCount: number;
     activeDays: number;

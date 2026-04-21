@@ -19,6 +19,7 @@ import {
 import { verifyToken } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import ProjectSubtitleUpload from "@/components/projects/ProjectSubtitleUpload";
+import ProjectSubtitleExportButtons from "@/components/projects/ProjectSubtitleExportButtons";
 
 const STATUS_LABEL: Record<string, string> = {
   DRAFT: "草稿",
@@ -69,7 +70,19 @@ async function getProject(id: number) {
 
   return prisma.project.findFirst({
     where: { id, userId: payload.userId },
-    include: { files: true },
+    include: {
+      files: true,
+      subtitleEntries: {
+        orderBy: { index: "asc" },
+        select: {
+          index: true,
+          startTime: true,
+          endTime: true,
+          original: true,
+          translation: true,
+        },
+      },
+    },
   });
 }
 
@@ -299,7 +312,8 @@ export default async function ProjectDetailPage({
               </div>
             )}
 
-            <div className="mt-8 space-y-3">
+            <ProjectSubtitleExportButtons entries={project.subtitleEntries} />
+            <div className="hidden">
               <p className="text-slate-400 text-sm font-medium mb-3">
                 导出选项
               </p>

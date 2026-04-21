@@ -11,7 +11,7 @@ type ProjectItemProps = {
   time: string;
   status: string;
   progress: number;
-  isDone: boolean;
+  isActive: boolean;
 };
 
 type DeleteProjectResponse = {
@@ -35,7 +35,7 @@ export default function ProjectItem({
   time,
   status,
   progress,
-  isDone,
+  isActive,
 }: ProjectItemProps) {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
@@ -118,7 +118,7 @@ export default function ProjectItem({
               </span>
               <span
                 className={`px-2.5 py-0.5 rounded-full ${
-                  isDone
+                  isActive
                     ? "bg-indigo-100 text-indigo-600"
                     : "bg-slate-100 text-slate-400"
                 }`}

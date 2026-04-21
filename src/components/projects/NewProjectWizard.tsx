@@ -229,7 +229,7 @@ export default function NewProjectWizard({
         body: JSON.stringify({
           targetLanguage: formData.targetLanguage,
           aiEnhanced: formData.aiEnhanced,
-          status: "PROCESSING",
+          status: "IN_PROGRESS",
           progress: 100,
           currentStep: 3,
         }),

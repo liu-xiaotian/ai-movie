@@ -2,11 +2,12 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import MovieDashboardClient from "./(main)/dashboard/MovieDashboardClient";
+import { redirect } from "next/navigation";
 
 export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
   const router = useRouter();
-
+  redirect("/dashboard");
   useEffect(() => {
     fetch("/api/auth/me", { cache: "no-store" })
       .then(async (res) => ({

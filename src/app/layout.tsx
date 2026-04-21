@@ -29,7 +29,7 @@ const themeScript = `
 `;
 
 export const metadata: Metadata = {
-  title: "ai movie - AI 瀛楀箷",
+  title: "ai movie",
 };
 
 export default function RootLayout({

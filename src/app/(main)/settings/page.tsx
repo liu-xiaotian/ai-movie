@@ -15,14 +15,14 @@ import ThemeSwitcher from "@/components/theme/ThemeSwitcher";
 
 export default function SettingsPage() {
   return (
-    <div className="relative min-h-screen bg-[var(--app-bg)] px-12 py-10 pb-28 text-[var(--text-strong)] transition-colors">
+    <div className="relative  bg-[var(--app-bg)] px-12 py-10 pb-28 text-[var(--text-strong)] transition-colors">
       <div className="mx-auto max-w-4xl">
         <header className="mb-10">
           <h1 className="mb-2 text-4xl font-bold text-[var(--text-strong)]">
             设置
           </h1>
           <p className="font-medium text-[var(--text-muted)]">
-            自定义你的翻译体验和偏好设置。
+            自定义你的偏好设置。
           </p>
         </header>
 
@@ -50,7 +50,7 @@ export default function SettingsPage() {
             </SettingsCard>
           </section>
 
-          <section>
+          {/* <section>
             <SectionTitle>AI 翻译</SectionTitle>
             <SettingsCard>
               <SettingRow
@@ -127,16 +127,16 @@ export default function SettingsPage() {
                 }
               />
             </SettingsCard>
-          </section>
+          </section> */}
 
-          <div className="mx-auto flex max-w-4xl items-center justify-end gap-6">
+          {/* <div className="mx-auto flex max-w-4xl items-center justify-end gap-6">
             <button className="font-bold text-[var(--text-medium)] transition-colors hover:text-[var(--text-strong)]">
               取消
             </button>
             <button className="rounded-2xl bg-brand px-10 py-3 font-bold text-white shadow-lg shadow-brand/20 transition-all hover:opacity-90">
               保存更改
             </button>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
@@ -184,9 +184,7 @@ function SettingRow({
         </div>
         <div>
           <h4 className="font-bold text-[var(--text-strong)]">{title}</h4>
-          <p className="text-xs font-medium text-[var(--text-muted)]">
-            {desc}
-          </p>
+          <p className="text-xs font-medium text-[var(--text-muted)]">{desc}</p>
         </div>
       </div>
       <div>{action}</div>

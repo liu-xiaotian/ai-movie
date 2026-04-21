@@ -14,6 +14,7 @@ export default async function NewProjectPage({
   const { autoCreateProject, initialProjectName } = getNewProjectPrefill(
     await searchParams,
   );
+  const pageTitle = initialProjectName || "新建项目";
 
   return (
     <div className="min-h-full bg-[#F8F9FD] px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
@@ -26,7 +27,7 @@ export default async function NewProjectPage({
                 Create Project
               </p>
               <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
-                新建项目
+                {pageTitle}
               </h1>
               <p className="mt-2 text-sm leading-7 text-slate-500">
                 独立访问时仍然保留完整创建流程，和弹框版本共用同一套逻辑。

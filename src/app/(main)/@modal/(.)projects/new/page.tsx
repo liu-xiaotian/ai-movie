@@ -13,9 +13,10 @@ export default async function NewProjectModalPage({
   const { autoCreateProject, initialProjectName } = getNewProjectPrefill(
     await searchParams,
   );
+  const modalTitle = initialProjectName || "新建项目";
 
   return (
-    <RouteDialog title="新建项目" description="">
+    <RouteDialog title={modalTitle} description="">
       <NewProjectWizard
         autoCreateProject={autoCreateProject}
         initialProjectName={initialProjectName}

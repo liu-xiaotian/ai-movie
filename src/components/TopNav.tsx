@@ -22,7 +22,7 @@ export default function TopNav() {
           />
           <input
             type="text"
-            placeholder="搜索项目、文件或设置..."
+            placeholder="搜索项目"
             className={clsx(
               "w-full bg-white border border-slate-200 rounded-2xl py-2.5 pl-12 pr-4",
               "text-sm outline-none shadow-sm transition-all",

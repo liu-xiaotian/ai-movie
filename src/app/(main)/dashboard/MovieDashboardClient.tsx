@@ -98,9 +98,9 @@ export default function MovieDashboardClient({
               <p className="mb-8 max-w-md leading-relaxed text-slate-200">
                 一组探险家穿越虫洞深入未知宇宙，在有限时间里为人类寻找新的生存希望。
               </p>
-              <button className="flex w-fit items-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 font-medium transition-colors hover:bg-indigo-500">
+              {/* <button className="flex w-fit items-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 font-medium transition-colors hover:bg-indigo-500">
                 <HelpCircle size={18} className="rotate-180" /> 查看详情
-              </button>
+              </button> */}
             </div>
           </section>
 

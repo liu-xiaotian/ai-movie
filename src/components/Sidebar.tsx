@@ -11,6 +11,8 @@ export default function Sidebar() {
   const menuItems = [
     { name: "电影推荐", icon: <Search size={18} />, href: "/dashboard" },
     { name: "项目", icon: <Folder size={18} />, href: "/projects" },
+    { name: "账户", icon: <HelpCircle size={18} />, href: "/account" },
+    { name: "设置", icon: <Settings size={18} />, href: "/settings" },
   ];
 
   return (
@@ -49,19 +51,19 @@ export default function Sidebar() {
 
       {/* Bottom Actions */}
       <div className="mt-auto space-y-4">
-        <Link href="/projects/new">
+        {/* <Link href="/projects/new">
           <button className="w-full bg-indigo-600 text-white py-3 rounded-xl font-medium shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all mb-4">
             新建项目
           </button>
-        </Link>
-        <div className="space-y-1">
+        </Link> */}
+        {/* <div className="space-y-1">
           <Link
             href="/settings"
             className="flex items-center gap-3 w-full p-2 text-slate-400 text-sm hover:text-slate-600 transition-colors"
           >
             <Settings size={18} /> 设置
           </Link>
-        </div>
+        </div> */}
       </div>
     </aside>
   );

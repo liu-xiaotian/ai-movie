@@ -3,8 +3,34 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  /* 1. 在这里定义 brand 的原始颜色值 */
   --brand: #4f39f6;
+  --app-bg: #f8f9fd;
+  --surface-strong: #ffffff;
+  --surface-soft: rgba(255, 255, 255, 0.82);
+  --surface-muted: rgba(241, 245, 249, 0.72);
+  --surface-hover: rgba(255, 255, 255, 0.75);
+  --border-strong: #e2e8f0;
+  --border-soft: rgba(255, 255, 255, 0.6);
+  --text-strong: #0f172a;
+  --text-medium: #475569;
+  --text-muted: #94a3b8;
+  --icon-surface: rgba(226, 232, 240, 0.55);
+}
+
+:root[data-theme="dark"] {
+  --background: #0b1120;
+  --foreground: #e2e8f0;
+  --app-bg: #0f172a;
+  --surface-strong: #111827;
+  --surface-soft: rgba(15, 23, 42, 0.8);
+  --surface-muted: rgba(30, 41, 59, 0.78);
+  --surface-hover: rgba(30, 41, 59, 0.92);
+  --border-strong: rgba(148, 163, 184, 0.22);
+  --border-soft: rgba(148, 163, 184, 0.16);
+  --text-strong: #f8fafc;
+  --text-medium: #cbd5e1;
+  --text-muted: #94a3b8;
+  --icon-surface: rgba(51, 65, 85, 0.75);
 }
 
 @theme inline {
@@ -12,21 +38,36 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-
-  /* 2. 在这里映射 Tailwind 类名 */
-  /* 添加这一行后，bg-brand, text-brand, shadow-brand 都会生效 */
   --color-brand: var(--brand);
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme]) {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --app-bg: #0f172a;
+    --surface-strong: #111827;
+    --surface-soft: rgba(15, 23, 42, 0.8);
+    --surface-muted: rgba(30, 41, 59, 0.78);
+    --surface-hover: rgba(30, 41, 59, 0.92);
+    --border-strong: rgba(148, 163, 184, 0.22);
+    --border-soft: rgba(148, 163, 184, 0.16);
+    --text-strong: #f8fafc;
+    --text-medium: #cbd5e1;
+    --text-muted: #94a3b8;
+    --icon-surface: rgba(51, 65, 85, 0.75);
   }
+}
+
+html {
+  background: var(--background);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }

@@ -1,5 +1,5 @@
 "use client";
-// app/(main)/layout.tsx
+
 import Sidebar from "@/components/Sidebar";
 import TopNav from "@/components/TopNav";
 import { useRouter } from "next/navigation";
@@ -26,22 +26,22 @@ export default function MainLayout({
         } else {
           setUser(data.user);
         }
-      } catch (err) {
-        console.error("获取用户信息失败：", err);
+      } catch (error) {
+        console.error("获取用户信息失败", error);
         router.replace("/login");
       }
     };
-    fetchUser();
+
+    fetchUser().catch(() => {});
   }, [router]);
 
-  // 4. token 有效 → 渲染子页面
   return (
-    <div className="flex h-screen overflow-hidden bg-[#F8F9FD]">
+    <div className="flex h-screen overflow-hidden bg-[var(--app-bg)] text-[var(--text-strong)] transition-colors">
       <Sidebar />
-      <main className="flex-1 flex flex-col h-screen overflow-y-hidden">
+      <div className="flex flex-1 flex-col overflow-hidden">
         <TopNav />
         <main className="flex-1 overflow-y-auto">{children}</main>
-      </main>
+      </div>
       {modal}
     </div>
   );

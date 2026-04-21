@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { verifyToken } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import ProjectSubtitleUpload from "@/components/projects/ProjectSubtitleUpload";
 
 const STATUS_LABEL: Record<string, string> = {
   DRAFT: "草稿",
@@ -116,12 +117,21 @@ export default async function ProjectDetailPage({
         </div>
 
         <div className="flex gap-3">
+          {subtitleFiles.length === 0 ? (
+            <ProjectSubtitleUpload
+              projectId={project.id}
+              redirectHref={`/projects/${project.id}/edit`}
+              buttonLabel="上传字幕"
+              helperText="支持 .srt、.vtt、.ass，上传后会继续进入编辑流程"
+            />
+          ) : (
           <Link
             href={`/projects/${project.id}/edit`}
             className="bg-indigo-600 text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all"
           >
             <PenLine size={18} /> 继续编辑
           </Link>
+          )}
         </div>
       </header>
 
